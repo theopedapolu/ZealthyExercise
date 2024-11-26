@@ -1,4 +1,3 @@
-
 type FormData = {
     email: string;
     password: string;
@@ -7,12 +6,6 @@ type FormData = {
     city: string;
     state: string;
     zip_code: string;
-    birthdate: string;
-  };
-  
-  type AdminSettings = {
-    address: string;
-    aboutme: string;
     birthdate: string;
   };
 
