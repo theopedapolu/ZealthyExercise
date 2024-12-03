@@ -96,91 +96,126 @@ export default function Admin() {
     };
 
     return (
-        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white backdrop-blur-xl shadow-lg border border-white border-opacity-30 rounded-xl p-8 rounded-lg w-fit h-fit flex flex-col items-center">
-            <div className="flex flex-col items-center justify-center">
-                <p className="font-bold text-3xl font-mono">Admin Page Controls</p>
-                <p className="mt-3 text-slate-500">Select the components to appear on each page</p>
+        <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-white shadow-2xl rounded-2xl overflow-hidden border border-gray-200 transform transition-all hover:scale-[1.02]">
+                <div className="bg-gray-800 text-white p-6 text-center">
+                    <h1 className="font-bold text-2xl sm:text-3xl tracking-tight">Admin Page Controls</h1>
+                    <p className="mt-2 text-sm opacity-80">Select the components to appear on each page</p>
+                </div>
+
+                <div className="p-6 sm:p-8">
+                    {/* Error Messages */}
+                    {validationErrors.length > 0 && (
+                        <div className="mb-4 bg-red-50 border-l-4 border-red-500 rounded-r-lg p-3">
+                            <ul className="text-red-600 list-disc list-inside">
+                                {validationErrors.map((error, index) => (
+                                    <li key={index} className="text-xs sm:text-sm">{error}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Success Message */}
+                    {submissionStatus === 'success' && (
+                        <div className="mb-4 bg-green-50 border-l-4 border-green-500 rounded-r-lg p-3">
+                            <div className="text-green-600 text-xs sm:text-sm">
+                                Admin settings updated successfully!
+                            </div>
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit} className='grid grid-cols-3 gap-x-2 gap-y-4'>
+                        <div className="col-span-3 grid grid-cols-3 text-center text-sm sm:text-base text-gray-600">
+                            <p className="col-start-2">2nd Page</p>
+                            <p>3rd Page</p>
+                        </div>
+
+                        {/* Address Field */}
+                        <div className="col-span-3 grid grid-cols-3 items-center gap-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                            <p className="text-sm sm:text-base text-gray-700">Address Field</p>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='address' 
+                                    value='2' 
+                                    onChange={handleChange} 
+                                    checked={admin_data.address === '2'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='address' 
+                                    value='3' 
+                                    onChange={handleChange} 
+                                    checked={admin_data.address === '3'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                        </div>
+
+                        {/* About Me Field */}
+                        <div className="col-span-3 grid grid-cols-3 items-center gap-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                            <p className="text-sm sm:text-base text-gray-700">About Me Field</p>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='aboutme' 
+                                    value='2' 
+                                    onChange={handleChange} 
+                                    checked={admin_data.aboutme === '2'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='aboutme' 
+                                    value='3'
+                                    onChange={handleChange} 
+                                    checked={admin_data.aboutme === '3'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                        </div>
+
+                        {/* Birth Date Field */}
+                        <div className="col-span-3 grid grid-cols-3 items-center gap-x-2 hover:bg-gray-50 p-2 rounded-lg transition-colors">
+                            <p className="text-sm sm:text-base text-gray-700">Birth Date Field</p>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='birthdate' 
+                                    value='2' 
+                                    onChange={handleChange} 
+                                    checked={admin_data.birthdate === '2'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                            <div className="flex justify-center">
+                                <input 
+                                    type='radio' 
+                                    name='birthdate' 
+                                    value='3'
+                                    onChange={handleChange} 
+                                    checked={admin_data.birthdate === '3'}
+                                    className="w-5 h-5 text-gray-600 focus:ring-gray-500 border-gray-300"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mt-6 col-span-3 flex flex-row justify-center">
+                            <button 
+                                type="submit" 
+                                className="w-full max-w-xs px-4 py-2 bg-gray-800 text-white rounded-lg hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-all duration-300 ease-in-out transform hover:scale-105 active:scale-95"
+                            >
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
-
-            {/* Error Messages */}
-            {validationErrors.length > 0 && (
-                <div className="mt-4 w-full bg-red-50 border border-red-200 rounded-lg p-3">
-                    <div className="text-red-600">
-                        <ul className="list-disc list-inside">
-                            {validationErrors.map((error, index) => (
-                                <li key={index} className="text-sm">{error}</li>
-                            ))}
-                        </ul>
-                    </div>
-                </div>
-            )}
-
-            {/* Success Message */}
-            {submissionStatus === 'success' && (
-                <div className="mt-4 w-full bg-green-50 border border-green-200 rounded-lg p-3">
-                    <div className="text-green-600 text-sm">
-                        Admin settings updated successfully!
-                    </div>
-                </div>
-            )}
-
-            <form onSubmit={handleSubmit} className='mt-5 grid grid-rows-4 grid-cols-3 gap-x-2 gap-y-3 font-mono'>
-                <p className="ml-10 col-start-2">2nd Page</p>
-                <p className="ml-10">3rd Page</p>
-                <p>Address Field</p>
-                <input 
-                    type='radio' 
-                    name='address' 
-                    value='2' 
-                    onChange={handleChange} 
-                    checked={admin_data.address === '2'}
-                />
-                <input 
-                    type='radio' 
-                    name='address' 
-                    value='3' 
-                    onChange={handleChange} 
-                    checked={admin_data.address === '3'}
-                />
-                <p>About Me Field</p>
-                <input 
-                    type='radio' 
-                    name='aboutme' 
-                    value='2' 
-                    onChange={handleChange} 
-                    checked={admin_data.aboutme === '2'}
-                />
-                <input 
-                    type='radio' 
-                    name='aboutme' 
-                    value='3'
-                    onChange={handleChange} 
-                    checked={admin_data.aboutme === '3'}
-                />
-                <p>Birth Date Field</p>
-                <input 
-                    type='radio' 
-                    name='birthdate' 
-                    value='2' 
-                    onChange={handleChange} 
-                    checked={admin_data.birthdate === '2'}
-                />
-                <input 
-                    type='radio' 
-                    name='birthdate' 
-                    value='3'
-                    onChange={handleChange} 
-                    checked={admin_data.birthdate === '3'}
-                />
-                <div className="mt-8 col-span-3 flex flex-row justify-center">
-                    <button 
-                        type="submit" 
-                        className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600"
-                    >
-                        Save
-                    </button>
-                </div>
-            </form>
         </div>
     );
 }

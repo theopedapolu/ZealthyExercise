@@ -64,12 +64,12 @@ export default function Data() {
     }
 
     return (
-        <div className="p-6">
-            <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
+        <div className="p-4 w-full overflow-x-auto">
+            <table className="w-full min-w-[800px] bg-white shadow-md rounded-lg overflow-hidden">
                 <thead className="bg-gray-100">
                     <tr>
-                        {['Email', 'Password Hash', 'About Me', 'Street Address', 'City', 'State', 'Zip Code', 'Birthdate'].map((header) => (
-                            <th key={header} className="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        {['Email', 'Password', 'About Me', 'Street Address', 'City', 'State', 'Zip Code', 'Birthdate'].map((header) => (
+                            <th key={header} className="px-2 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider whitespace-nowrap">
                                 {header}
                             </th>
                         ))}
@@ -78,14 +78,14 @@ export default function Data() {
                 <tbody className="divide-y divide-gray-200">
                     {documents.map((doc, idx) => (
                         <tr key={idx} className="hover:bg-gray-50">
-                            <td className="px-4 py-2">{doc.email}</td>
-                            <td className="px-4 py-2">{doc.password}</td>
-                            <td className="px-4 py-2">{doc.about_me}</td>
-                            <td className="px-4 py-2">{doc.street_address}</td>
-                            <td className="px-4 py-2">{doc.city}</td>
-                            <td className="px-4 py-2">{doc.state}</td>
-                            <td className="px-4 py-2">{doc.zip_code}</td>
-                            <td className="px-4 py-2">{doc.birthdate}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.email}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.password.substring(0,10)}</td>
+                            <td className="px-2 py-2 text-sm">{doc.about_me}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.street_address}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.city}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.state}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.zip_code}</td>
+                            <td className="px-2 py-2 text-sm whitespace-nowrap">{doc.birthdate}</td>
                         </tr>
                     ))}
                 </tbody>

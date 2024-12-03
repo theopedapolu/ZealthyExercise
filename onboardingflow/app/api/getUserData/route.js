@@ -1,9 +1,9 @@
-import clientPromise from "../db";
+import {clientPromise, dbName} from "../db.js";
 import {NextResponse} from "next/server";
 
 export async function GET() {
     const client = await clientPromise;
-    const db = client.db('wizard_data');
+    const db = client.db(dbName);
     try {
         const result = await db.collection('user_data').find();
         let data = []

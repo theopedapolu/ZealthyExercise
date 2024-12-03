@@ -1,24 +1,11 @@
 "use client"
-import React, { useState, useEffect } from 'react';
-import { EmailInput, PasswordInput, AboutMeInput, AddressInputs, BirthdateInput } from './components/FormFields';
+import React, { useState, useEffect} from 'react';
+import { FormData } from './types/FormData';
+import { AdminSettings } from './types/AdminSettings';
+import { ValidationErrors } from './types/ValidationErrors';
+import {EmailInput, PasswordInput, AboutMeInput, AddressInputs, BirthdateInput} from './components/FormFields/FormFields';
 import { useRouter } from 'next/navigation';
-
-type FormData = {
-  email: string;
-  password: string;
-  about_me: string;
-  street_address: string;
-  city: string;
-  state: string;
-  zip_code: string;
-  birthdate: string;
-};
-
-type AdminSettings = {
-  address: string;
-  aboutme: string;
-  birthdate: string;
-};
+import OnboardingFlow from './components/OnboardingFlow';
 
 export default function UserForm() {
   // Router for navigation
@@ -36,12 +23,37 @@ export default function UserForm() {
     birthdate: ''
   });
 
+  // State for form input validation errors
+  const [errors, setErrors] = useState<ValidationErrors>({
+    email: '',
+    password: '',
+    about_me: '',
+    street_address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    birthdate: ''
+  });
+
   // State for admin settings to control form pages
   const [adminSettings, setAdminSettings] = useState<AdminSettings>({
+    email: '1',
+    password: '1',
     address: '1',
     aboutme: '1',
     birthdate: '1'
   });
+
+  const dataToAdmin: Record<keyof FormData, keyof AdminSettings> = {
+    email: "email",
+    password: "password",
+    street_address: "address",
+    city: "address",
+    state: "address",
+    zip_code: "address",
+    about_me: "aboutme",
+    birthdate: "birthdate"
+  }
 
   // Current page state
   const [pageNum, setPageNum] = useState(1);
@@ -52,13 +64,45 @@ export default function UserForm() {
       try {
         const response = await fetch('/api/getAdminData');
         const admin_data = await response.json();
-        setAdminSettings(admin_data);
+        setAdminSettings((prevSettings) => ({ ...prevSettings, ...admin_data}));
       } catch (error) {
         console.error('Error fetching admin data:', error);
       }
     };
 
     fetchAdminData();
+  }, []);
+
+  // Fetch partial user data on component mount
+  useEffect(() => {
+    const fetchPartialUserData = async () => {
+      try {
+        const response = await fetch('/api/getPartialUserData');
+        const userData = await response.json();
+        const newUserData: FormData = {
+          email: '',
+          password: '',
+          about_me: '',
+          street_address: '',
+          city: '',
+          state: '',
+          zip_code: '',
+          birthdate: ''
+        };
+        Object.keys(userData).forEach((key) => {
+          if (key != 'pageNum' && key != '_id') {
+            newUserData[key as keyof FormData] = userData[key];
+          }
+        })
+        setData(newUserData);
+        setPageNum(parseInt(userData["pageNum"]));
+        console.log(userData);
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
+    };
+
+    fetchPartialUserData();
   }, []);
 
   // Generic change handler for all inputs
@@ -74,15 +118,37 @@ export default function UserForm() {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     try {
-      const response = await fetch('/api/saveUserData', {
+      // Insert new User record
+      const responseSave = await fetch('/api/saveUserData', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
         body: JSON.stringify(data)
       });
-      const result = await response.json();
-      console.log(result);
+      const resultSave = await responseSave.json();
+      console.log(resultSave);
+      
+      // Reset Partial Data
+      const responseReset = await fetch('/api/updatePartialUserData', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({
+          email: '',
+          password: '',
+          about_me: '',
+          street_address: '',
+          city: '',
+          state: '',
+          zip_code: '',
+          birthdate: '',
+          pageNum:1
+        })
+      });
+      const resultReset = await responseReset.json();
+      console.log(resultReset);
       // Handle successful submission (e.g., show success message, redirect)
       router.push('/success');
     } catch (error) {
@@ -92,93 +158,69 @@ export default function UserForm() {
 
   // Page navigation handlers
   const goToPrevPage = () => setPageNum(Math.max(1, pageNum - 1));
-  const goToNextPage = () => setPageNum(Math.min(3, pageNum + 1));
+  const goToNextPage = () => {
+    setPageNum(Math.min(3, pageNum + 1));
+    const saveUserData = async () => {
+        try {
+        const response = await fetch('/api/updatePartialUserData', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({...data,pageNum:Math.min(3, pageNum + 1)})
+        });
+        const result = await response.json();
+        console.log(result);
+      } catch (error) {
+        console.error('Error saving data:', error);
+      }
+    }
+    saveUserData();
+  }
 
   // Render components based on page and admin settings
-  const renderPageComponents = () => {
-    switch (pageNum) {
+  const renderPageComponents = (num : number) => {
+    switch (num) {
       case 1:
         return (
           <>
-            <EmailInput value={data.email} onChange={handleChange} />
-            <PasswordInput value={data.password} onChange={handleChange} />
+            <EmailInput value={data.email} onChange={handleChange} emailError={errors.email} updateErrors={setErrors}/>
+            <PasswordInput value={data.password} onChange={handleChange} passwordError={errors.password} updateErrors={setErrors}/>
           </>
         );
       case 2:
         return (
           <>
-            {adminSettings.address === '2' && <AddressInputs data={data} onChange={handleChange} />}
-            {adminSettings.aboutme === '2' && <AboutMeInput value={data.about_me} onChange={handleChange} />}
-            {adminSettings.birthdate === '2' && <BirthdateInput value={data.birthdate} onChange={handleChange} />}
+            {adminSettings.address === '2' && <AddressInputs data={data} onChange={handleChange} addressErrors={{street_address:errors.street_address, city:errors.city, state: errors.state, zip_code: errors.zip_code}} updateErrors={setErrors} />}
+            {adminSettings.aboutme === '2' && <AboutMeInput value={data.about_me} onChange={handleChange} aboutMeError={errors.about_me} updateErrors={setErrors}/>}
+            {adminSettings.birthdate === '2' && <BirthdateInput value={data.birthdate} onChange={handleChange} birthdateError={errors.birthdate} updateErrors={setErrors}/>}
           </>
         );
       case 3:
         return (
           <>
-            {adminSettings.address !== '2' && <AddressInputs data={data} onChange={handleChange} />}
-            {adminSettings.aboutme !== '2' && <AboutMeInput value={data.about_me} onChange={handleChange} />}
-            {adminSettings.birthdate !== '2' && <BirthdateInput value={data.birthdate} onChange={handleChange} />}
+            {adminSettings.address === '3' && <AddressInputs data={data} onChange={handleChange} addressErrors={{street_address:errors.street_address, city:errors.city, state: errors.state, zip_code: errors.zip_code}} updateErrors={setErrors} />}
+            {adminSettings.aboutme === '3' && <AboutMeInput value={data.about_me} onChange={handleChange} aboutMeError={errors.about_me} updateErrors={setErrors}/>}
+            {adminSettings.birthdate === '3' && <BirthdateInput value={data.birthdate} onChange={handleChange} birthdateError={errors.birthdate} updateErrors={setErrors}/>}
           </>
         );
       default:
-        return null;
+        return <></>
     }
   };
 
+  const preventProceed = (keys : string[], pageNum : number) => {
+    return keys.filter((key) => parseInt(adminSettings[dataToAdmin[key as keyof FormData]])==pageNum).some((key) => data[key as keyof FormData] === '' || errors[key as keyof ValidationErrors] !== '')
+  }
+
   return (
-    <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-white backdrop-blur-xl shadow-lg border border-white border-opacity-30 rounded-xl p-8 w-fit h-fit flex flex-col items-center">
-      <div>
-        <p className="text-3xl font-mono font-bold">Welcome!</p>
-      </div>
-      
-      <form onSubmit={handleSubmit} className='mt-10 flex flex-col items-center justify-center'>
-        <div className='flex flex-col items-center justify-center gap-y-3'>
-          {renderPageComponents()}
-          
-          {pageNum === 3 && (
-            <button 
-              type='submit' 
-              className='mt-5 px-4 py-2 font-mono text-white bg-green-500 hover:bg-green-600 rounded-xl'
-            >
-              Submit
-            </button>
-          )}
-        </div>
-      </form>
-
-      <div className='mt-10 flex flex-row gap-x-20 items-center justify-between'>
-        <button 
-          type="button"
-          onClick={goToPrevPage} 
-          className='flex items-center px-2 font-mono text-white bg-rose-500 hover:bg-rose-600 rounded-xl'
-          disabled={pageNum === 1}
-        >
-          Prev <span className='font-bold ml-2 text-2xl'>&larr;</span>
-        </button>
-
-        <div className='flex flex-row gap-x-2 items-center justify-center'>
-          {[1, 2, 3].map((num) => (
-            <div 
-              key={num} 
-              className={`px-2 py-1 font-mono text-white ${
-                pageNum === num ? 'bg-blue-500' : 'bg-blue-200'
-              } rounded-xl`}
-            >
-              {num}
-            </div>
-          ))}
-        </div>
-
-        <button 
-          type="button"
-          onClick={goToNextPage} 
-          className='flex items-center px-2 font-mono text-white bg-rose-500 hover:bg-rose-600 rounded-xl'
-          disabled={pageNum === 3}
-        >
-          Next <span className='font-bold ml-2 text-2xl'>&rarr;</span>
-        </button>
-      </div>
-    </div>
-  );
+    <OnboardingFlow 
+      renderPageComponents={renderPageComponents} 
+      handleSubmit={handleSubmit} 
+      goToPrevPage={goToPrevPage} 
+      goToNextPage={goToNextPage} 
+      pageNum={pageNum} 
+      preventProceed={preventProceed(Object.keys(data),pageNum)}
+    />
+  );  
 }
-

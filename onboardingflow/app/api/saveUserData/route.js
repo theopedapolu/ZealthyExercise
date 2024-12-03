@@ -1,10 +1,10 @@
-import clientPromise from "../db";
+import {clientPromise, dbName} from "../db.js";
 import { NextResponse } from 'next/server';
 import {createHash} from "crypto";
 
 export async function POST(request) {
     const client = await clientPromise;
-    const db = client.db('wizard_data');
+    const db = client.db(dbName);
     try {
         const data = await request.json()
         data.password = createHash('sha256').update(data.password).digest('hex');

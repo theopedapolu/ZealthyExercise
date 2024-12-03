@@ -1,6 +1,8 @@
 import {MongoClient, ServerApiVersion} from 'mongodb';
 
 const uri = process.env.MONGODB_URI;
+const dbName = process.env.MONGODB_NAME;
+
 const options = {
     serverApi: {
       version: ServerApiVersion.v1,
@@ -24,4 +26,4 @@ if (process.env.NODE_ENV === 'development') {
     clientPromise = client.connect()
 }
 
-export default clientPromise;
+export {clientPromise, dbName};
